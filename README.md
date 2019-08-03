@@ -19,3 +19,4 @@ Run training with command
 $ sh run-lstm-training.sh 0
 Run inference with command
 $ sh run-lstm-inference.sh videos-valid.txt 0
+
