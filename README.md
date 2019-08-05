@@ -2,8 +2,7 @@
 
 Download the VIRAT dataset from
 http://www.viratdata.org/
-
-Annotations are in the data folder.
+and take ground truth annotations from the gt.rar archive.
 
 ## SSD Detector
 Code was originally obtained from
