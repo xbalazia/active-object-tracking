@@ -1,0 +1,218 @@
+{
+  "Closing": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Closing_Trunk": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Entering": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Exiting": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Loading": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Open_Trunk": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Opening": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Pull": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Riding": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Talking": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Transport_HeavyCarry": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "Unloading": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "activity_carrying": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "specialized_talking_phone": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "specialized_texting_phone": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "vehicle_turning_left": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "vehicle_turning_right": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }, 
+  "vehicle_u_turn": {
+    "objectTypes": [
+      "Bike", 
+      "Construction_Vehicle", 
+      "Door", 
+      "Other", 
+      "Person", 
+      "Prop", 
+      "Push_Pulled_Object", 
+      "Vehicle"
+    ]
+  }
+}

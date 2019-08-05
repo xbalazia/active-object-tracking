@@ -1,0 +1,61 @@
+{
+  "activities": [
+    {
+      "activity": "Entering", 
+      "activityID": 363, 
+      "localization": {
+        "VIRAT_S_000206_01_000148_000184.mp4": {
+          "586": 1, 
+          "759": 0
+        }
+      }, 
+      "objects": [
+        {
+          "localization": {
+            "VIRAT_S_000206_01_000148_000184.mp4": {
+              "586": {
+                "boundingBox": {
+                  "h": 23, 
+                  "w": 23, 
+                  "x": 960, 
+                  "y": 398
+                }
+              }, 
+              "601": {
+                "boundingBox": {
+                  "h": 23, 
+                  "w": 23, 
+                  "x": 961, 
+                  "y": 400
+                }
+              }, 
+              "615": {}
+            }
+          }, 
+          "objectID": 1, 
+          "objectType": "Person"
+        }, 
+        {
+          "localization": {
+            "VIRAT_S_000206_01_000148_000184.mp4": {
+              "586": {
+                "boundingBox": {
+                  "h": 48, 
+                  "w": 113, 
+                  "x": 912, 
+                  "y": 410
+                }
+              }, 
+              "759": {}
+            }
+          }, 
+          "objectID": 2, 
+          "objectType": "Vehicle"
+        }
+      ]
+    }
+  ], 
+  "filesProcessed": [
+    "VIRAT_S_000206_01_000148_000184.mp4"
+  ]
+}
