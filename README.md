@@ -1,5 +1,10 @@
 # Active Object Tracking
 
+Download the VIRAT dataset from
+http://www.viratdata.org/
+
+Annotations are in the data folder.
+
 ## SSD Detector
 Code was originally obtained from
 https://github.com/elranu/ssd_pi/blob/master/ssd_predictor.py
