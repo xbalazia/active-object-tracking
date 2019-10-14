@@ -9,7 +9,6 @@ import numpy as np
 import cv2 as cv
 import sys, os, argparse, configparser, operator, pickle, datetime
 
-
 def loadINI(iniPath, i):
 	config = configparser.ConfigParser()
 	config.optionxform = str
@@ -18,27 +17,28 @@ def loadINI(iniPath, i):
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--config', default='config.ini', help='Path to config file.')
-	parser.add_argument('--index', default='0', help='[i] in config file.')
-	parser.add_argument('--gpu', default='0', help='GPU number to use.')
-	parser.add_argument('--video_list_path', dest='video_list_path', help='video list path', default='virat.txt')
+	parser.add_argument('-c', '--config', default='config.ini', help='Path to config file.')
+	parser.add_argument('-i', '--index', default='0', help='[i] in config file.')
+	parser.add_argument('-v', '--video_list_path', dest='video_list_path', help='Path to video list file.', default='vids.txt')
 	return parser.parse_args()	
 
-def load_plates(detDictFilePath, trkConfThresh, bbDetMaxArea):
+def load_plates(detDictFilePath, detConfThresh, bbDetMaxArea):
 	plates = {}
 	if os.path.exists(detDictFilePath):
 		with open(detDictFilePath, 'rb') as detDictFile:
 			detDict = pickle.load(detDictFile)
 		for detID in detDict.keys():
-			for f,objType,x1,y1,w,h,conf in detDict[detID]:
-				confThreshCheck = float(conf)>=trkConfThresh
+			bbDict, objType, _, _, conf = detDict[detID]
+			for f in bbDict.keys():
+				x1,y1,w,h = bbDict[f]
+				confThreshCheck = conf>=detConfThresh
 				bbDetMaxAreaCheck = w*h<=bbDetMaxArea
 				personSizeCheck = not (objType in ['person'] and w>h)
 				vehicleSizeCheck = not (objType in ['car','bus'] and w<h)
 				if confThreshCheck and bbDetMaxAreaCheck and personSizeCheck and vehicleSizeCheck:
 					if f not in plates.keys():
 						plates[f] = []
-					plates[f].append((x1,y1,w,h,objType))
+					plates[f].append((x1,y1,w,h,objType,conf))
 	else:
 		print(detDictFilePath+' does not exist.')
 	return plates
@@ -72,18 +72,14 @@ def diffPos(boxA, boxB):
 	x1B,y1B,x2B,y2B = boxB
 	return abs((x1A+x2A)-(x1B+x2B))+abs((y1A+y2A)-(y1B+y2B))
 
-def diffBox(boxA, boxB):
-	x1A,y1A,x2A,y2A = boxA
-	x1B,y1B,x2B,y2B = boxB
-	return abs(x1A-x1B)+abs(y1A-y1B)+abs(x2A-x2B)+abs(y2A-y2B)
-
 class MOSSE:
-	def __init__(self, frame, box, trackerID, objType):
+	def __init__(self, frame, trackerID, box, objType, conf):
 		x1,y1,x2,y2 = box
 		self.size = w,h = x2-x1,y2-y1
 		self.pos = int(x1+0.5*w),int(y1+0.5*h)
 		self.trackerID = trackerID
 		self.objType = objType
+		self.conf = conf
 		self.inactiveFrames = 0
 		self.psrAvg = 0
 		self.updateSize(self.size, frame)
@@ -157,7 +153,7 @@ class MOSSE:
 class App:
 	def __init__(self, paused=True):
 		self.cap = create_capture(videoPath)
-		self.plates = load_plates(os.path.join(detectionsFolder, detector, video+'.pickle'), trkConfThresh, bbDetMaxArea)
+		self.plates = load_plates(os.path.join(detectionsFolder, detector, video+'.pickle'), detConfThresh, bbDetMaxArea)
 		self.trackers = {}
 		self.paused = paused
 		self.reverseTrackers = {}
@@ -182,7 +178,9 @@ class App:
 	def run(self):
 		trkDict = {}
 		trackerID = itercount(1)
+		objTypeDict = {}
 		begin = datetime.datetime.now()
+		confAvg = 0
 		f = 0
 		while True:
 			f += 1
@@ -192,30 +190,32 @@ class App:
 				print("Error reading video (Frame-%d)..."%f)
 			if not ok:
 				break
-			time = datetime.datetime.now() - begin
-			sys.stdout.write('\r'+str(time).split('.')[0]+' '+video+': '+str(f)+fill)
+			sys.stdout.write('\r'+str(datetime.datetime.now()-begin).split('.')[0]+' trk('+trkDesc+') '+video+': '+str(f))
 			sys.stdout.flush()
 			frame_gray = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
 			detected = []
 			if f in self.plates.keys():
-				for x1N,y1N,wN,hN,objTypeN in self.plates[f]:
+				for x1N,y1N,wN,hN,objTypeN,confN in self.plates[f]:
 					boxN = (x1N,y1N,x1N+wN,y1N+hN)
 					trackerKey = self.checkExistTracker(boxN)
 					if f==1 or not trackerKey:
-						tracker = MOSSE(frame_gray, boxN, next(trackerID), objTypeN)
+						# initializing new object tube
+						tracker = MOSSE(frame_gray, next(trackerID), boxN, objTypeN, confN)
 						self.trackers[boxN] = tracker
 						if f>1:
 							self.reverseTrackers[boxN] = (f, tracker)
 						detected.append(trackerID)
 					else:
+						# existing object tube found
 						tracker = self.trackers[trackerKey]
 						hasMinDiff = True
 						(x0T,y0T), (wT,hT) = tracker.pos, tracker.size
+						tracker.conf = ((f-1)*tracker.conf+confN)/f
 						boxT = x0T+0.5*wT,y0T+0.5*hT,x0T-0.5*wT,y0T-0.5*hT
 						diffPosNT = diffPos(boxN,boxT)
 						if diffPosNT>maxDiffPos:
 							continue
-						for x1B,y1B,wB,hB,objTypeB in self.plates[f]:
+						for x1B,y1B,wB,hB,_,_ in self.plates[f]:
 							boxB = (x1B,y1B,x1B+wB,y1B+hB)
 							if diffPos(boxB,boxT)<diffPosNT:
 								hasMinDiff = False
@@ -233,35 +233,37 @@ class App:
 					tracker.update(frame_gray)
 					tracker.objType = None
 				objType = tracker.objType
+				if trkID not in objTypeDict.keys():
+					objTypeDict[trkID] = {}
+				if objType not in objTypeDict[trkID].keys():
+					objTypeDict[trkID][objType] = 0
+				objTypeDict[trkID][objType] += 1
 				(x0,y0), (w,h) = tracker.pos, tracker.size
+				conf = tracker.conf
 				if trkID not in trkDict.keys():
-					trkDict[trkID] = {}
-				trkDict[trkID][f] = objType,(int(x0-0.5*w),int(y0-0.5*h),w,h)
+					#bbDict, objType, trkID, act, conf
+					trkDict[trkID] = [{}, '', 0, '', conf]
+				bbDict, _, _, _, conf = trkDict[trkID]
+				bbDict[f] = [int(x0-0.5*w),int(y0-0.5*h),w,h]
+				trkDict[trkID] = [bbDict, '', 0, '', conf]
 				if tracker.inactiveFrames>maxInactiveFrames:
 					del self.trackers[trackerKey]
 		sys.stdout.write('\n')
-		delIDs = []
-		for trkID in trkDict.keys():
-			objTypeCountDict = {}
-			for f in trkDict[trkID].keys():
-				objType,_ = trkDict[trkID][f]
-				if objType!=None:
-					if objType not in objTypeCountDict.keys():
-						objTypeCountDict[objType] = 0
-					objTypeCountDict[objType] += 1
-			if objTypeCountDict:
-				objTypeFinal = max(objTypeCountDict.items(), key=operator.itemgetter(1))[0]
-				if objTypeFinal in objects and objTypeCountDict[objTypeFinal]>=minDets:
-					bbDict = {}
-					for f in trkDict[trkID].keys():
-						_,bbDict[f] = trkDict[trkID][f]
-					trkDict[trkID] = objTypeFinal, bbDict
+		for trkID in list(trkDict.keys()):
+			if trkID not in trkDict.keys():
+				continue
+			if objTypeDict[trkID]:
+				objTypeFinal = max(objTypeDict[trkID].items(), key=operator.itemgetter(1))[0]
+				if objTypeFinal==None and len(objTypeDict[trkID])>1:
+					del objTypeDict[trkID][objTypeFinal]
+					objTypeFinal = max(objTypeDict[trkID].items(), key=operator.itemgetter(1))[0]
+				if objTypeFinal in objects and objTypeDict[trkID][objTypeFinal]>=minDets:
+					bbDict, _, _, _, conf = trkDict[trkID]
+					trkDict[trkID] = [bbDict, objTypeFinal, 0, '', conf]
 				else:
-					delIDs.append(trkID)
+					trkDict.pop(trkID)
 			else:
-				delIDs.append(trkID)
-		for delID in delIDs:
-			del trkDict[delID]
+				trkDict.pop(trkID)
 		self.cap.release()
 		cv.destroyAllWindows()
 		if not os.path.exists(trkFolder):
@@ -276,9 +278,9 @@ if __name__ == '__main__':
 	videosFolder = varDict['videosFolder']
 	detectionsFolder = varDict['detectionsFolder']
 	detector = varDict['detector']
-	trkConfThresh = float(varDict['trkConfThresh'])
-	tracker = 'mosse'
-	trkFolder = os.path.join(varDict['tracksFolder'], detector+'+'+tracker)
+	detConfThresh = float(varDict['detConfThresh'])
+	trkDesc = detector+'+mosse'
+	trkFolder = os.path.join(varDict['tracksFolder'], trkDesc)
 	bbDetMaxArea = 60000 # 'maximum area of detection bounding box'
 	bbTrkMinEdge = 15 # 'minimum edge of tracking bounding box'
 	maxDiffPos = 65 # 'maximum difference between detection and tracking bounding box'
@@ -292,7 +294,6 @@ if __name__ == '__main__':
 	PY3 = sys.version_info[0]==3
 	if PY3:
 		xrange = range
-	fill = '        '
 	with open(args.video_list_path,'r') as vidListFile:
 		videos = vidListFile.read().splitlines()
 	for video in videos:
