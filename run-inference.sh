@@ -15,7 +15,7 @@ declare -r gpu=$4
 #python3 mosse/mosse.py -v $vlp
 
 echo "python3 lstm/inference.py -v $vlp -m $mod -g $gpu"
-python3 lstm/inference-binary.py -v $vlp -m $mod -g $gpu
+python3 lstm/inference.py -v $vlp -m $mod -g $gpu
 
 echo "python3 hcf/filter.py -v $vlp -m $mod"
 python3 hcf/filter.py -v $vlp -m $mod
