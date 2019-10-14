@@ -36,7 +36,7 @@ Run tracking with command
 $ python3 mosse/mosse.py videos-valid.txt
 ```
 
-## VGG16+LSTM+HCF+MNS Regressor
+## VGG16+LSTM+HCF+NMS Regressor
 Run training with command
 ```
 $ ./run-training.sh
