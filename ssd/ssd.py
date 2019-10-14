@@ -1,4 +1,4 @@
-import sys, os, argparse, configparser, cv2, pickle
+import sys, os, argparse, configparser, cv2, pickle, datetime
 import numpy as np
 from keras import backend as K
 from keras.preprocessing import image
@@ -15,10 +15,10 @@ def loadINI(iniPath, i):
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--config', default='config.ini', help='Path to config file.')
-	parser.add_argument('--index', default='0', help='[i] in config file.')
-	parser.add_argument('--gpu', default='0', help='GPU number to use.')
-	parser.add_argument('--video_list_path', dest='video_list_path', help='Path to video list file.', default='vids.txt')
+	parser.add_argument('-c', '--config', default='config.ini', help='Path to config file.')
+	parser.add_argument('-i', '--index', default='0', help='[i] in config file.')
+	parser.add_argument('-g', '--gpu', default='0', help='GPU number to use.')
+	parser.add_argument('-v', '--video_list_path', dest='video_list_path', help='Path to video list file.', default='vids.txt')
 	return parser.parse_args()
 
 if __name__ == '__main__':
@@ -30,8 +30,7 @@ if __name__ == '__main__':
 	detConfThresh = float(varDict['detConfThresh'])
 	weightsFilePath = 'ssd/VGG_coco_SSD_512x512.h5'
 	img_width,img_height = 512,512
-	detector = 'ssd'
-	fill = '        '
+	detDesc = 'ssd'
 	
 	# Build the Keras model
 	K.clear_session() # Clear previous models from memory.
@@ -70,9 +69,10 @@ if __name__ == '__main__':
 	for video in videos:
 		cap = cv2.VideoCapture(os.path.join(videosFolder, video+'.mp4'))
 		f = 0
-		detID = ''
-		detDict = {detID: []}
-		while(1):
+		detID = 0
+		detDict = {}
+		begin = datetime.datetime.now()
+		while True:
 			ret, frame = cap.read()
 			if not ret:
 				break
@@ -99,15 +99,17 @@ if __name__ == '__main__':
 				x2 = int(xmax * orig.shape[1] / img_width)
 				y2 = int(ymax * orig.shape[0] / img_height)
 				conf = round(confidence,4)
-				detDict[detID].append([f,objType,x1,y1,x2-x1,y2-y1,conf])
+				detID += 1
+				#bbDict, objType, trkID, act, conf
+				detDict[detID] = [{f: [x1,y1,x2-x1,y2-y1]}, objType, 0, '', conf]
 			input_images = []
-			sys.stdout.write('\r'+video+': '+str(f)+fill)
+			sys.stdout.write('\r'+str(datetime.datetime.now()-begin).split('.')[0]+' det('+detDesc+') '+video+': '+str(f))
 			sys.stdout.flush()
+		sys.stdout.write('\n')
 
 		# Create output files
-		print('Creating output PICKLE')
-		detFolder = os.path.join(detectionsFolder, detector)
+		detFolder = os.path.join(detectionsFolder, detDesc)
 		if not os.path.exists(detFolder):
 			os.makedirs(detFolder)
 		with open(os.path.join(detFolder, video+'.pickle'), 'wb') as detDictFile:
-				pickle.dump(detDict, detDictFile)
+			pickle.dump(detDict, detDictFile)
